@@ -1,13 +1,28 @@
 #include <string>
 #include <list>
 #include <stdexcept>
+#include <fstream>
 
 #include <string.h>
 
 #include "../include/arguments.hpp"
 
 void arguments::make_list(void) {
-    // todo
+    std::ifstream file;
+    try {
+        file.open(this->in_file);
+        std::string line;
+        while (std::getline(file, line)) {
+            if (line.at(0) == '#') continue;
+            std::string str = line.substr(line.find("\t") + 1, line.length() - 1);
+            this->points.push_back({std::stof(str.substr(0, str.find("\t"))), std::stof(str.substr(str.find("\t") + 1, str.length() - 1))});
+        }
+    } catch (...) {
+        file.close();
+        throw;
+    }
+    file.close();
+    return;
 }
 
 arguments::arguments(int argc, char *argv[]) {
