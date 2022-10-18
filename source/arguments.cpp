@@ -1,7 +1,35 @@
+#include <string>
+#include <list>
+#include <stdexcept>
+
+#include <string.h>
+
 #include "../include/arguments.hpp"
 
-arguments::arguments(int argc, char *argv[]) {
+void arguments::make_list(void) {
     // todo
+}
+
+arguments::arguments(int argc, char *argv[]) {
+    if (argc < 9) throw std::invalid_argument("Too few arguments");
+    if (strcmp(argv[1], "-i") || strcmp(argv[3], "-o") || strcmp(argv[5], "-algorithm") || strcmp(argv[7], "-edge_selection")) throw std::invalid_argument("Wrong arguments");
+    if (strcmp(argv[6], "incremental") && strcmp(argv[6], "convex_hull")) throw std::invalid_argument("Wrong argumetns");
+    if (strcmp(argv[8], "1") && strcmp(argv[8], "2") && strcmp(argv[8], "3")) throw std::invalid_argument("Wrong arguments");
+    if (!strcmp(argv[6], "incremental")) {
+        if (argc != 11) throw std::invalid_argument("Wrong arguments");
+        if (strcmp(argv[9], "-initialization")) throw std::invalid_argument("Wrong arguments");
+        if (strcmp(argv[10], "1a") && strcmp(argv[10], "1b") && strcmp(argv[10], "2a") && strcmp(argv[10], "2b")) throw std::invalid_argument("Wrong arguments");
+        this->init = std::string(argv[10]);
+    } else if (argc != 9) throw std::invalid_argument("Too many arguments");
+    this->in_file = std::string(argv[2]);
+    this->out_file = std::string(argv[4]);
+    this->alg = std::string(argv[6]);
+    this->edge_sel = std::string(argv[8]);
+    try {
+        make_list();
+    } catch (...) {
+        throw;
+    }
     return;
 }
 

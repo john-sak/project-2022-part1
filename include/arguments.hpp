@@ -12,6 +12,7 @@ class arguments {
         std::string edge_sel;
         std::string init;
         std::list<std::pair<float, float>> points;
+        void make_list(void);
     public:
         arguments(int, char **);
         std::string get_in_file(void) const;
