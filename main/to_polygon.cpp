@@ -4,7 +4,6 @@
 #include <string>
 
 #include "../include/arguments.hpp"
-#include "../include/data.hpp"
 
 int main(int argc, char *argv[]) {
     try {
