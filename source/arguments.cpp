@@ -25,7 +25,7 @@ void arguments::make_list(void) {
     return;
 }
 
-arguments::arguments(int argc, char *argv[]) {
+void arguments::initialize(int argc, char *argv[]) {
     if (argc < 9) throw std::invalid_argument("Too few arguments");
     if (strcmp(argv[1], "-i") || strcmp(argv[3], "-o") || strcmp(argv[5], "-algorithm") || strcmp(argv[7], "-edge_selection")) throw std::invalid_argument("Wrong arguments");
     if (strcmp(argv[6], "incremental") && strcmp(argv[6], "convex_hull")) throw std::invalid_argument("Wrong argumetns");

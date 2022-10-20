@@ -14,7 +14,7 @@ class arguments {
         std::list<std::pair<float, float>> points;
         void make_list(void);
     public:
-        arguments(int, char **);
+        void initialize(int, char **);
         std::string get_in_file(void) const;
         std::string get_out_file(void) const;
         std::string get_alg(void) const;

@@ -6,8 +6,9 @@
 #include "../include/arguments.hpp"
 
 int main(int argc, char *argv[]) {
+    arguments arg;
     try {
-        arguments arg(argc, argv);
+        arg.initialize(argc, argv);
     } catch (std::invalid_argument const &ex) {
         std::cerr << ex.what() << std::endl;
         std::cerr << "Usage: ./to_polygon -i <input_file> -o <output_file> -algorithm <\"incremental\" | \"convex_hull\"> -edge_selection <\"1\" | \"2\" | \"3\"> -initialization <\"1a\" | \"1b\" | \"2a\" | \"2b\">" << std::endl;
