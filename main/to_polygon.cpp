@@ -8,6 +8,7 @@
 int main(int argc, char *argv[]) {
     arguments arg;
     try {
+        // get arguments from command line
         arg.initialize(argc, argv);
     } catch (std::invalid_argument const &ex) {
         std::cerr << ex.what() << std::endl;
@@ -18,6 +19,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     try {
+        // run the given algorithm, write results in given out_file
         polyline S(arg.get_points(), arg.get_alg(), arg.get_edge_sel(), arg.get_init(), arg.get_out_file());
     } catch (std::exception const &ex) {
         std::cerr << ex.what() << std::endl;

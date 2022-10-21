@@ -7,6 +7,7 @@ polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, st
     this->edge_sel = std::stoi(edge_sel);
     if (this->edge_sel != 1 && this->edge_sel != 2 && this->edge_sel != 3) throw std::invalid_argument("Wrong arguments");
     try {
+        // run the correct algorithm
         if (!alg.compare("incremental")) {
             int initialization;
             if (!init.compare("1a")) initialization = 1;

@@ -13,8 +13,10 @@ void arguments::make_vector(void) {
         file.open(this->in_file);
         std::string line;
         while (std::getline(file, line)) {
+            // ignore comments
             if (line.at(0) == '#') continue;
             std::string str = line.substr(line.find("\t") + 1, line.length() - 1);
+            // save points as pair of 2 floating point numbers
             this->points.push_back({std::stof(str.substr(0, str.find("\t"))), std::stof(str.substr(str.find("\t") + 1, str.length() - 1))});
         }
     } catch (...) {
