@@ -26,7 +26,28 @@ polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, st
 }
 
 void polyline::incremental(int init) {
-    // todo
+    try {
+        // sort this->points
+        switch (init) {
+            case 1:
+                // x descending
+                break;
+            case 2:
+                // x ascending
+                break;
+            case 3:
+                // y descending
+                break;
+            case 4:
+                // y ascending
+                break;
+            default:
+                throw "Error: Couldn't sort vector";
+        }
+        // todo the rest
+    } catch (...) {
+        throw;
+    }
     return;
 }
 
