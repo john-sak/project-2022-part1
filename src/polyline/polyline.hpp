@@ -13,6 +13,7 @@ class polyline {
         void convex_hull();
     public:
         polyline(std::vector<std::pair<float, float>>, std::string, std::string, std::string, std::string);
+        void print_points(void) const;
 };
 
 #endif

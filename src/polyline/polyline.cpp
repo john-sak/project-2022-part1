@@ -1,7 +1,9 @@
 #include <vector>
 #include <stdexcept>
+#include <algorithm>
+#include <iostream>
 
-#include "../include/polyline.hpp"
+#include "polyline.hpp"
 
 polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, std::string edge_sel, std::string init, std::string out_file): points(vec), out_file(out_file) {
     this->edge_sel = std::stoi(edge_sel);
@@ -31,15 +33,25 @@ void polyline::incremental(int init) {
         switch (init) {
             case 1:
                 // x descending
+                std::sort(this->points.begin(),this->points.end(),[] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                    return (a.first > b.first);
+                });
                 break;
             case 2:
                 // x ascending
+                std::sort(this->points.begin(),this->points.end());
                 break;
             case 3:
                 // y descending
+                std::sort(this->points.begin(),this->points.end(),[] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                    return (a.second  > b.second);
+                });
                 break;
             case 4:
                 // y ascending
+                std::sort(this->points.begin(),this->points.end(),[] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                    return (a.second  < b.second);
+                });
                 break;
             default:
                 throw "Error: Couldn't sort vector";
@@ -54,4 +66,9 @@ void polyline::incremental(int init) {
 void polyline::convex_hull(void) {
     // todo
     return;
+}
+
+void polyline::print_points(void) const {
+    for(std::pair<float,float> i : this->points)
+        std::cout << i.first << " " << i.second << std::endl;
 }

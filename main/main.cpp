@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 
-#include "../include/arguments.hpp"
-#include "../include/polyline.hpp"
+#include <arguments.hpp>
+#include <polyline.hpp>
 
 int main(int argc, char *argv[]) {
     arguments arg;
@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
     try {
         // run the given algorithm, write results in given out_file
         polyline S(arg.get_points(), arg.get_alg(), arg.get_edge_sel(), arg.get_init(), arg.get_out_file());
+        S.print_points();
     } catch (std::exception const &ex) {
         std::cerr << ex.what() << std::endl;
         return -1;
