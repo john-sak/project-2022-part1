@@ -14,7 +14,7 @@ class arguments {
         std::vector<std::pair<float, float>> points;
         void make_vector(void);
     public:
-        void initialize(int, char **);
+        arguments(int, char **);
         std::string get_in_file(void) const;
         std::string get_out_file(void) const;
         std::string get_alg(void) const;
