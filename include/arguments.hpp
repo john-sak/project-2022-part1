@@ -2,7 +2,7 @@
 #define ARGUMENTS_HPP
 
 #include <string>
-#include <list>
+#include <vector>
 
 class arguments {
     private:
@@ -11,8 +11,8 @@ class arguments {
         std::string alg;
         std::string edge_sel;
         std::string init;
-        std::list<std::pair<float, float>> points;
-        void make_list(void);
+        std::vector<std::pair<float, float>> points;
+        void make_vector(void);
     public:
         void initialize(int, char **);
         std::string get_in_file(void) const;
@@ -20,7 +20,7 @@ class arguments {
         std::string get_alg(void) const;
         std::string get_edge_sel(void) const;
         std::string get_init(void) const;
-        std::list<std::pair<float, float>> get_points(void) const;
+        std::vector<std::pair<float, float>> get_points(void) const;
 };
 
 #endif

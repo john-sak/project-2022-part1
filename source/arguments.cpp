@@ -1,5 +1,5 @@
 #include <string>
-#include <list>
+#include <vector>
 #include <stdexcept>
 #include <fstream>
 
@@ -7,7 +7,7 @@
 
 #include "../include/arguments.hpp"
 
-void arguments::make_list(void) {
+void arguments::make_vector(void) {
     std::ifstream file;
     try {
         file.open(this->in_file);
@@ -41,7 +41,7 @@ void arguments::initialize(int argc, char *argv[]) {
     this->alg = std::string(argv[6]);
     this->edge_sel = std::string(argv[8]);
     try {
-        make_list();
+        make_vector();
     } catch (...) {
         throw;
     }
@@ -68,6 +68,6 @@ std::string arguments::get_init(void) const {
     return this->init;
 }
 
-std::list<std::pair<float, float>> arguments::get_points(void) const {
+std::vector<std::pair<float, float>> arguments::get_points(void) const {
     return this->points;
 }

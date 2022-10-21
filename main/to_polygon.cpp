@@ -1,9 +1,9 @@
 // to_polygon.cpp
 #include <iostream>
-#include <list>
 #include <string>
 
 #include "../include/arguments.hpp"
+#include "../include/polyline.hpp"
 
 int main(int argc, char *argv[]) {
     arguments arg;
@@ -17,6 +17,11 @@ int main(int argc, char *argv[]) {
         std::cerr << ex.what() << std::endl;
         return -1;
     }
-    // todo
+    try {
+        polyline S(arg.get_points(), arg.get_alg(), arg.get_edge_sel(), arg.get_init(), arg.get_out_file());
+    } catch (std::exception const &ex) {
+        std::cerr << ex.what() << std::endl;
+        return -1;
+    }
     return 0;
 }
