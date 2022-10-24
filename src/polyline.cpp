@@ -48,7 +48,9 @@ void polyline::incremental(int init) {
         p.push_back(Point(0, 0));
         p.push_back(Point(0, 1));
         p.push_back(Point(1, 0));
-        for (const Point &p: p.vertices()) std::cout << p << std::endl;
+        // for (const Point &p: p.vertices()) std::cout << p << std::endl;
+        for (auto vi = p.vertices_begin(); vi != p.vertices_end(); ++vi) std::cout << *vi << std::endl;
+
 
         // todo the rest
     } catch (...) {
