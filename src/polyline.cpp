@@ -3,7 +3,15 @@
 #include <algorithm>
 #include <iostream>
 
-#include "polyline.hpp"
+#include <polyline.hpp>
+
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polygon_2.h>
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef K::Point_2 Point;
+typedef CGAL::Polygon_2<K> Polygon;
+typedef K::Segment_2 Segment;
 
 void polyline::incremental(int init) {
     try {
@@ -11,29 +19,37 @@ void polyline::incremental(int init) {
         switch (init) {
             case 1:
                 // x descending
-                std::sort(this->points.begin(),this->points.end(),[] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
                     return (a.first > b.first);
                 });
                 break;
             case 2:
                 // x ascending
-                std::sort(this->points.begin(),this->points.end());
+                std::sort(this->points.begin(), this->points.end());
                 break;
             case 3:
                 // y descending
-                std::sort(this->points.begin(),this->points.end(),[] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
-                    return (a.second  > b.second);
+                std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                    return (a.second > b.second);
                 });
                 break;
             case 4:
                 // y ascending
-                std::sort(this->points.begin(),this->points.end(),[] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
-                    return (a.second  < b.second);
+                std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                    return (a.second < b.second);
                 });
                 break;
             default:
                 throw "Error: Couldn't sort vector";
         }
+
+        // random stuff on a polygon
+        Polygon p;
+        p.push_back(Point(0, 0));
+        p.push_back(Point(0, 1));
+        p.push_back(Point(1, 0));
+        for (const Point &p: p.vertices()) std::cout << p << std::endl;
+
         // todo the rest
     } catch (...) {
         throw;
@@ -52,13 +68,11 @@ polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, st
     try {
         // run the correct algorithm
         if (!alg.compare("incremental")) {
-            int initialization;
-            if (!init.compare("1a")) initialization = 1;
-            else if (!init.compare("1b")) initialization = 2;
-            else if (!init.compare("2a")) initialization = 3;
-            else if (!init.compare("2b")) initialization = 4;
+            if (!init.compare("1a")) this->incremental(1);
+            else if (!init.compare("1b")) this->incremental(2);
+            else if (!init.compare("2a")) this->incremental(3);
+            else if (!init.compare("2b")) this->incremental(4);
             else throw std::invalid_argument("\'Initialization\' must be \'1a\', \'1b\', \'2a\' or \'2b\'");
-            this->incremental(initialization);
         } else if (!alg.compare("convex_hull")) {
             this->convex_hull();
         } else throw std::invalid_argument("\'Algorithm\' must be \'incremental\' or \'convex_hull\'");
@@ -69,6 +83,6 @@ polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, st
 }
 
 void polyline::print_points(void) const {
-    for(std::pair<float,float> i : this->points)
-        std::cout << i.first << " " << i.second << std::endl;
+    for(std::pair<float,float> i : this->points) std::cout << i.first << " " << i.second << std::endl;
+    return;
 }

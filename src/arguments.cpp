@@ -5,7 +5,7 @@
 
 #include <string.h>
 
-#include "arguments.hpp"
+#include <arguments.hpp>
 
 void arguments::make_vector(void) {
     std::ifstream file;
