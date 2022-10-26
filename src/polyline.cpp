@@ -5,54 +5,26 @@
 
 #include <polyline.hpp>
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Polygon_2.h>
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef K::Point_2 Point;
-typedef CGAL::Polygon_2<K> Polygon;
-typedef K::Segment_2 Segment;
-
 void polyline::incremental(int init) {
     try {
         // sort this->points
-        switch (init) {
-            case 1:
-                // x descending
-                std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
-                    return (a.first > b.first);
-                });
-                break;
-            case 2:
-                // x ascending
-                std::sort(this->points.begin(), this->points.end());
-                break;
-            case 3:
-                // y descending
-                std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
-                    return (a.second > b.second);
-                });
-                break;
-            case 4:
-                // y ascending
-                std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
-                    return (a.second < b.second);
-                });
-                break;
-            default:
-                throw "Error: Couldn't sort vector";
-        }
+        this->sort_points(init);
 
-        // random stuff on a polygon
-        Polygon p;
-        for(auto it = points.begin(); it != points.end(); ++it) p.push_back(Point(it->first, it->second));
-        for (auto vi = p.vertices_begin(); vi != p.vertices_end(); ++vi) std::cout << *vi << std::endl;
-        if(p.is_simple())
-            std::cout << "P is simple" << std::endl;
-        else
-            std::cout << "P isn't simple" << std::endl;
+        // initialize polygon
+        int i = this->init_polygon();
 
-        // todo the rest
+        // expand polygn
+        this->expand(i);
+
+        // write to output file
+        this->write_to_file();
+
+        // for(auto it = points.begin(); it != points.end(); ++it) p.push_back(Point(it->first, it->second));
+        // for (auto vi = p.vertices_begin(); vi != p.vertices_end(); ++vi) std::cout << *vi << std::endl;
+        // if(p.is_simple())
+        //     std::cout << "P is simple" << std::endl;
+        // else
+        //     std::cout << "P isn't simple" << std::endl;
     } catch (...) {
         throw;
     }
@@ -60,11 +32,91 @@ void polyline::incremental(int init) {
 }
 
 void polyline::convex_hull(void) {
+    try {
+        // convex hull
+    } catch (...) {
+        throw;
+    }
+    return;
+}
+
+void polyline::sort_points(int type) {
+    switch (type) {
+        case 1:
+            // x descending
+            std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                return (a.first > b.first);
+            });
+            break;
+        case 2:
+            // x ascending
+            std::sort(this->points.begin(), this->points.end());
+            break;
+        case 3:
+            // y descending
+            std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                return (a.second > b.second);
+            });
+            break;
+        case 4:
+            // y ascending
+            std::sort(this->points.begin(), this->points.end(), [] (const std::pair<float,float> &a, const std::pair<float,float> &b) {
+                return (a.second < b.second);
+            });
+            break;
+        default:
+            throw "Error: Couldn't sort vector";
+    }
+}
+
+int polyline::init_polygon(void) {
+    try {
+        Point p1(this->points[0].first, this->points[0].second);
+        Point p2(this->points[1].first, this->points[1].second);
+        Point p3(this->points[2].first, this->points[2].second);
+        this->PL.push_back(p1);
+        this->PL.push_back(p2);
+        this->PL.push_back(p3);
+        this->CH.push_back(p1);
+        this->CH.push_back(p2);
+        this->CH.push_back(p3);
+        if (!CGAL::collinear(p1, p2, p3)) return 3;
+        int i = 3;
+        int flag = 1;
+        do {
+            Point p(this->points[i].first, this->points[i].second);
+            this->PL.push_back(p);
+            this->CH.push_back(p);
+            i++;
+            if (!CGAL::collinear(p1, p2, p)) flag = 0;
+        } while (flag);
+        return i;
+    } catch (...) {
+        throw;
+    }
+}
+
+void polyline::expand(int i) {
+    try {
+        while (i < this->points.size()) {
+            Point p(this->points[i].first, this->points[i].second);
+            i++;
+            // find red lines of CH
+            // for every red find visible
+            // choose visible (edge_sel)
+        }
+        return;
+    } catch (...) {
+        throw;
+    }
+}
+
+void polyline::write_to_file(void) const {
     // todo
     return;
 }
 
-polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, std::string edge_sel, std::string init, std::string out_file): points(vec), out_file(out_file) {
+polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, std::string edge_sel, std::string init, std::string out_file): points(vec), PL(), CH(), out_file(out_file) {
     this->edge_sel = std::stoi(edge_sel);
     if (this->edge_sel != 1 && this->edge_sel != 2 && this->edge_sel != 3) throw std::invalid_argument("\'Edge selection\' must be \'1\', \'2\' or \'3\'");
     try {
