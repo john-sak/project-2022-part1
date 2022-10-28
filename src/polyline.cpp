@@ -121,21 +121,25 @@ void polyline::expand(int i) {
         std::vector<Point> curr_ch;
         // previous convex hull variable
         std::vector<Point> prev_ch;
-        // get convex hull of current polygon points plus the next point to add
-        curr_ch = get_ch(i);
 
+        std::vector<Segment> curr_ch_segment;
+        std::vector<Segment> prev_ch_segment;
+        std::vector<Segment> red_lines;
+        // get convex hull of current polygon points
+        curr_ch = get_ch(i - 1);
         while (i < this->points.size()) {
             // insert next point to polygon line points
             this->pl_points.push_back(this->points[i]);
             
             prev_ch = curr_ch;
-
+            prev_ch_segment = get_segment(prev_ch);
             // get convex hull of current polygon points plus the next point to add
             curr_ch = get_ch(i);
-
+            curr_ch_segment = get_segment(curr_ch);
             // red lines of current convex hull are the ones removed from previous convex hull
-            // probably need to create segments of both hulls to find the difference
-            
+            // next step:
+            // compare the two segments to get red lines 
+
 
             i++; 
             // find red lines of CH
@@ -195,4 +199,18 @@ polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, st
 void polyline::print_points(void) const {
     for(auto it = points.begin(); it != points.end(); ++it) std::cout << it->x() << " " << it->y() << std::endl;
     return;
+}
+
+
+//Helper function
+std::vector<Segment> get_segment(std::vector<Point> points) {
+    std::vector<Segment> seg; 
+    int i = 0;
+
+    while(i != points.size()) {
+        seg.push_back(Segment(points[i], points[i+1]));
+        i++;
+    }
+    seg.push_back(Segment(points[points.size() - 1], points[0]));
+    return seg;
 }
