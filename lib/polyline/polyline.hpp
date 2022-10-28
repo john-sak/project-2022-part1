@@ -14,9 +14,10 @@ typedef K::Segment_2 Segment;
 
 class polyline {
     private:
-        std::vector<std::pair<float, float>> points;
+        std::vector<Point> points;
+        std::vector<Point> pl_points;
+        std::vector<Segment> poly_line;
         int edge_sel;
-        Polygon PL, CH;
         std::string out_file;
         void incremental(int);
         void convex_hull(void);
@@ -24,6 +25,7 @@ class polyline {
         int init_polygon(void);
         void expand(int);
         void write_to_file(void) const;
+        std::vector<Point> get_ch(int);
     public:
         polyline(std::vector<std::pair<float, float>>, std::string, std::string, std::string, std::string);
         void print_points(void) const;
