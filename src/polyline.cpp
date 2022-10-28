@@ -133,7 +133,9 @@ void polyline::expand(int i) {
             // get convex hull of current polygon points plus the next point to add
             curr_ch = get_ch(i);
 
-            // red lines of current convex hull are the ones removed from previous convex hull 
+            // red lines of current convex hull are the ones removed from previous convex hull
+            // probably need to create segments of both hulls to find the difference
+            
 
             i++; 
             // find red lines of CH
@@ -155,7 +157,6 @@ std::vector<Point> polyline::get_ch(int i) {
     std::vector<std::size_t> indices(this->pl_points.size()), out;
     std::iota(indices.begin(), indices.end(),0);
 
-    // create convex hull of the current polygon + the new point
     CGAL::convex_hull_2(indices.begin(), indices.end(), std::back_inserter(out), Convex_hull_traits_2(CGAL::make_property_map(this->pl_points)));
     // push back points to current convex hull variable
     for( std::size_t j : out) curr_ch.push_back(this->pl_points[j]);
