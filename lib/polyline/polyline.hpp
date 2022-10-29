@@ -24,8 +24,11 @@ class polyline {
         void sort_points(int);
         int init_polygon(void);
         void expand(int);
-        void write_to_file(void) const;
         std::vector<Point> get_ch(int);
+        std::vector<Segment> get_segment(std::vector<Point>);
+        std::vector<Segment> get_red_lines(std::vector<Segment>, std::vector<Segment>);
+        std::vector<Segment> get_vis_lines(int, ste::vector<Segment>);
+        void write_to_file(void) const;
     public:
         polyline(std::vector<std::pair<float, float>>, std::string, std::string, std::string, std::string);
         void print_points(void) const;

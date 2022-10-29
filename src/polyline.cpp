@@ -6,12 +6,12 @@
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/Convex_hull_traits_adapter_2.h>
 #include <CGAL/property_map.h>
+#include <CGAL/intersections.h>
 
 #include <polyline.hpp>
 
-typedef CGAL::Convex_hull_traits_adapter_2<K,
-          CGAL::Pointer_property_map<Point>::type > Convex_hull_traits_2;
-
+typedef CGAL::Convex_hull_traits_adapter_2<K, CGAL::Pointer_property_map<Point>::type> Convex_hull_traits_2;
+typedef K::Intersect_2 Intersect;
 
 void polyline::incremental(int init) {
     try {
@@ -26,13 +26,6 @@ void polyline::incremental(int init) {
 
         // write to output file
         this->write_to_file();
-
-        // for(auto it = points.begin(); it != points.end(); ++it) p.push_back(Point(it->first, it->second));
-        // for (auto vi = p.vertices_begin(); vi != p.vertices_end(); ++vi) std::cout << *vi << std::endl;
-        // if(p.is_simple())
-        //     std::cout << "P is simple" << std::endl;
-        // else
-        //     std::cout << "P isn't simple" << std::endl;
     } catch (...) {
         throw;
     }
@@ -96,9 +89,9 @@ int polyline::init_polygon(void) {
         int i = 3;
         //collinearity flag
         int flag = 1;
-        // stop while when the first non collinear point is found
+        // stop when the first non collinear point is found
         do {
-            //create netx segment
+            //create next segment
             this->pl_points.push_back(this->points[i]);
             this->poly_line.push_back(Segment(this->points[i - 1], this->points[i]));
             if (!CGAL::collinear(this->points[0], this->points[1], this->points[i])) {
@@ -124,7 +117,9 @@ void polyline::expand(int i) {
 
         std::vector<Segment> curr_ch_segment;
         std::vector<Segment> prev_ch_segment;
+
         std::vector<Segment> red_lines;
+        std::vector<Segment> vis_lines;
         // get convex hull of current polygon points
         curr_ch = get_ch(i - 1);
         while (i < this->points.size()) {
@@ -137,14 +132,15 @@ void polyline::expand(int i) {
             curr_ch = get_ch(i);
             curr_ch_segment = get_segment(curr_ch);
             // red lines of current convex hull are the ones removed from previous convex hull
-            // next step:
+
             // compare the two segments to get red lines 
+            red_lines = get_red_lines(prev_ch, curr_ch);
 
-
-            i++; 
-            // find red lines of CH
             // for every red find visible
+            vis_lines = get_vis_lines(i, red_lines);
+
             // choose visible (edge_sel)
+            i++; 
         }
         for( auto it = curr_ch.begin(); it != curr_ch.end(); ++it) std::cout << it->x() << " " << it->y() << std::endl;
         std::cout << "PREV" << std::endl;
@@ -166,6 +162,42 @@ std::vector<Point> polyline::get_ch(int i) {
     for( std::size_t j : out) curr_ch.push_back(this->pl_points[j]);
 
     return curr_ch;
+}
+
+std::vector<Segment> get_segment(std::vector<Point> points) {
+    std::vector<Segment> seg;
+    int i = 0;
+
+    while(i != points.size()) {
+        seg.push_back(Segment(points[i], points[i+1]));
+        i++;
+    }
+    seg.push_back(Segment(points[points.size() - 1], points[0]));
+    return seg;
+}
+
+std::vector<Segment> get_red_lines(std::vector<Segment> prev, std::vector<Segment> curr) {
+    std::vector<Segment> seg;
+
+    for (Segment line : prev) if (std::find(curr.begin(), curr.end(), line) == curr.end()) seg.push_back(line);
+    return seg;
+}
+
+std::vector<Segment> get_vis_lines(int i, std::vector<Segment> red_lines) {
+    std::vector<Segment> seg;
+
+    Point p = this->points[i];
+    for (Segment red : red_lines) {
+        Segment red1(p, source()), red2(p, red.target());
+        int flag = 1;
+        for (Segment line : this->poly_line)
+            if (intersection(red1, line) || intersection(red2, line)) {
+                flag = 0;
+                break;
+            }
+        if (flag) seg.push_back(red);
+    }
+    return seg;
 }
 
 void polyline::write_to_file(void) const {
@@ -199,18 +231,4 @@ polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, st
 void polyline::print_points(void) const {
     for(auto it = points.begin(); it != points.end(); ++it) std::cout << it->x() << " " << it->y() << std::endl;
     return;
-}
-
-
-//Helper function
-std::vector<Segment> get_segment(std::vector<Point> points) {
-    std::vector<Segment> seg; 
-    int i = 0;
-
-    while(i != points.size()) {
-        seg.push_back(Segment(points[i], points[i+1]));
-        i++;
-    }
-    seg.push_back(Segment(points[points.size() - 1], points[0]));
-    return seg;
 }
