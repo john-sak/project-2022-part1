@@ -139,7 +139,8 @@ void polyline::expand(int i) {
             // for every red find visible
             vis_lines = get_vis_lines(i, red_lines);
 
-            // choose visible (edge_sel)
+            // choose visible
+            // todo choose visible line (edge_sel)
             i++; 
         }
         for( auto it = curr_ch.begin(); it != curr_ch.end(); ++it) std::cout << it->x() << " " << it->y() << std::endl;
@@ -179,6 +180,7 @@ std::vector<Segment> get_segment(std::vector<Point> points) {
 std::vector<Segment> get_red_lines(std::vector<Segment> prev, std::vector<Segment> curr) {
     std::vector<Segment> seg;
 
+    // red edges are the edges that are on the previous convex hull, but not the current one
     for (Segment line : prev) if (std::find(curr.begin(), curr.end(), line) == curr.end()) seg.push_back(line);
     return seg;
 }
@@ -186,6 +188,7 @@ std::vector<Segment> get_red_lines(std::vector<Segment> prev, std::vector<Segmen
 std::vector<Segment> get_vis_lines(int i, std::vector<Segment> red_lines) {
     std::vector<Segment> seg;
 
+    // for every red edge, check whether it is visible from point i
     Point p = this->points[i];
     for (Segment red : red_lines) {
         Segment red1(p, source()), red2(p, red.target());
