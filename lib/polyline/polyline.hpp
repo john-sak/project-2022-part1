@@ -19,6 +19,8 @@ class polyline {
         std::vector<Segment> poly_line;
         int edge_sel;
         std::string out_file;
+        int pl_area;
+        int ch_area;
         void incremental(int);
         void convex_hull(void);
         void sort_points(int);
@@ -28,7 +30,7 @@ class polyline {
         std::vector<Segment> get_segment(std::vector<Point>);
         std::vector<Segment> get_red_edges(std::vector<Segment>, std::vector<Segment>);
         std::vector<Segment> get_vis_edges(int, std::vector<Segment>);
-        void write_to_file(void) const;
+        void write_to_file(std::string, int) const;
     public:
         polyline(std::vector<std::pair<float, float>>, std::string, std::string, std::string, std::string);
         void print_points(void) const;

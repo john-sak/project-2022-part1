@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/Convex_hull_traits_adapter_2.h>
@@ -15,6 +16,7 @@ typedef K::Intersect_2 Intersect;
 
 void polyline::incremental(int init) {
     try {
+        // ======= TODO: measure time =======
         // sort this->points
         this->sort_points(init);
 
@@ -25,7 +27,8 @@ void polyline::incremental(int init) {
         this->expand(i);
 
         // write to output file
-        this->write_to_file();
+        // ======= TODO: measure time =======
+        this->write_to_file("Incremental");
     } catch (...) {
         throw;
     }
@@ -127,17 +130,17 @@ void polyline::expand(int i) {
             this->pl_points.push_back(this->points[i]);
             
             prev_ch = curr_ch;
-            prev_ch_segment = get_segment(prev_ch);
+            prev_ch_segment = this->get_segment(prev_ch);
             // get convex hull of current polygon points plus the next point to add
             curr_ch = get_ch(i);
-            curr_ch_segment = get_segment(curr_ch);
+            curr_ch_segment = this->get_segment(curr_ch);
             // red lines of current convex hull are the ones removed from previous convex hull
 
             // compare the two segments to get red lines 
-            red_edges = get_red_edges(prev_ch_segment, curr_ch_segment);
+            red_edges = this->get_red_edges(prev_ch_segment, curr_ch_segment);
 
             // for every red find visible
-            vis_edges = get_vis_edges(i, red_edges);
+            vis_edges = this->get_vis_edges(i, red_edges);
 
             // choose visible
             // todo choose visible line (edge_sel)
@@ -157,7 +160,7 @@ std::vector<Point> polyline::get_ch(int i) {
 
     CGAL::convex_hull_2(indices.begin(), indices.end(), std::back_inserter(out), Convex_hull_traits_2(CGAL::make_property_map(this->pl_points)));
     // push back points to current convex hull variable
-    for( std::size_t j : out) curr_ch.push_back(this->pl_points[j]);
+    for(std::size_t j : out) curr_ch.push_back(this->pl_points[j]);
 
     return curr_ch;
 }
@@ -181,10 +184,11 @@ std::vector<Segment> polyline::get_red_edges(std::vector<Segment> prev, std::vec
     for (Segment line : prev) if ((*(std::find(curr.begin(), curr.end(), line)) == *curr.end()) && (line != *curr.end())) seg.push_back(line);
     // test
     std::cout << "RED EDGES" << std::endl;
-    for( auto it = seg.begin(); it != seg.end(); ++it) std::cout << it->source() << " " << it->target() << std::endl;
+    for(auto it = seg.begin(); it != seg.end(); ++it) std::cout << it->source() << " " << it->target() << std::endl;
 
     return seg;
 }
+
 // for every red edge, checks if it is visible from point i
 std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edges) {
     std::vector<Segment> seg;
@@ -232,15 +236,26 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
     return seg;
 }
 
-void polyline::write_to_file(void) const {
-    // todo
+void polyline::write_to_file(std::string alg, int time) const {
+    try {
+        std::ofstream file(this->out_file, std::ios_base::app);
+        for (Point p : this->points) file << p->first << " " << p->second << std::endl;
+        for (Segment s : this->poly_line) file << s->source().first << " " << s->source().second << " " << s->target().first << " " << s->target().second << std::endl;
+        file << "Algorithm: " << alg << "_" << this->edge_sel << std::endl;
+        // TODO: ======= calculate polyline and convex_hull areas =======
+        file << "Area: " << this->pl_area << std::endl;
+        file << "Ratio: " << (this->pl_area / this->ch_area) << std::endl;
+        file << "Construction time: " << time << " msec" << std::endl;
+        file.close();
+    } catch (...) {
+        throw;
+    }
     return;
 }
 
 polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, std::string edge_sel, std::string init, std::string out_file): out_file(out_file) {
     //initialize points
-    for(auto it = vec.begin(); it != vec.end(); ++it)
-        points.push_back(Point(it->first,it->second));
+    for(auto it = vec.begin(); it != vec.end(); ++it) this->points.push_back(Point(it->first, it->second));
     this->edge_sel = std::stoi(edge_sel);
     if (this->edge_sel != 1 && this->edge_sel != 2 && this->edge_sel != 3) throw std::invalid_argument("\'Edge selection\' must be \'1\', \'2\' or \'3\'");
     try {
