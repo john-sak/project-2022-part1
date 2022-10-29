@@ -185,7 +185,7 @@ std::vector<Segment> polyline::get_red_edges(std::vector<Segment> prev, std::vec
 
     return seg;
 }
-// for every red edge, checks whether it is visible from point i
+// for every red edge, checks if it is visible from point i
 std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edges) {
     std::vector<Segment> seg;
     Point p = this->points[i];
