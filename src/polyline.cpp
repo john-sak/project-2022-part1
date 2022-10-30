@@ -293,7 +293,6 @@ Segment polyline::max_area(std::vector<Segment> vis_edges,int i) {
     return repleceable;
 }
 
-
 void polyline::insert_point(Segment repleceable_edge,int i) {
     auto index = std::find(poly_line.begin(), poly_line.end(), repleceable_edge);
     this->poly_line.insert(index, Segment(index->source(), this->points[i]));
@@ -307,7 +306,8 @@ void polyline::insert_point(Segment repleceable_edge,int i) {
 
 void polyline::write_to_file(std::string alg, int time) const {
     try {
-        std::ofstream file(this->out_file, std::ios_base::app);
+        std::ofstream file(this->out_file);
+        file << "Polygonization" << std::endl;
         for (Point p : this->points) file << p.x() << " " << p.y() << std::endl;
         for (Segment s : this->poly_line) file << s.source() << " " << s.target() << std::endl;
         file << "Algorithm: " << alg << "_" << this->edge_sel << std::endl;
