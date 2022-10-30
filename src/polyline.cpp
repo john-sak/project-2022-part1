@@ -248,7 +248,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
     }
     return seg;
 }
-// HAS POSSIBLE BUGS!!!!!
+// HAS POSSIBLE BUGS DECIDING IF EDGE IS VISIBLE!!!!!
 bool polyline::is_vis(Segment red1, Segment red2) {
         for(Segment line : this->poly_line) {
             if (!(intersection(red1, line) && intersection(red2, line))) continue;
