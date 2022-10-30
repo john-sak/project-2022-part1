@@ -14,16 +14,27 @@ typedef K::Segment_2 Segment;
 
 class polyline {
     private:
-        std::vector<std::pair<float, float>> points;
+        std::vector<Point> points;
+        std::vector<Point> pl_points;
+        std::vector<Segment> poly_line;
         int edge_sel;
-        Polygon PL, CH;
         std::string out_file;
+        int pl_area;
+        int ch_area;
         void incremental(int);
         void convex_hull(void);
         void sort_points(int);
         int init_polygon(void);
         void expand(int);
-        void write_to_file(void) const;
+        Segment min_area(std::vector<Segment>, int);
+        Segment max_area(std::vector<Segment>, int);
+        void insert_point(Segment, int);
+        std::vector<Point> get_ch(int);
+        std::vector<Segment> get_segment(std::vector<Point>);
+        std::vector<Segment> get_red_edges(std::vector<Segment>, std::vector<Segment>);
+        std::vector<Segment> get_vis_edges(int, std::vector<Segment>);
+        bool is_vis(Segment, Segment); 
+        void write_to_file(std::string, int) const;
     public:
         polyline(std::vector<std::pair<float, float>>, std::string, std::string, std::string, std::string);
         void print_points(void) const;
