@@ -26,10 +26,14 @@ class polyline {
         void sort_points(int);
         int init_polygon(void);
         void expand(int);
+        Segment min_area(std::vector<Segment>, int);
+        Segment max_area(std::vector<Segment>, int);
+        void insert_point(Segment, int);
         std::vector<Point> get_ch(int);
         std::vector<Segment> get_segment(std::vector<Point>);
         std::vector<Segment> get_red_edges(std::vector<Segment>, std::vector<Segment>);
         std::vector<Segment> get_vis_edges(int, std::vector<Segment>);
+        bool is_vis(Segment, Segment); 
         void write_to_file(std::string, int) const;
     public:
         polyline(std::vector<std::pair<float, float>>, std::string, std::string, std::string, std::string);

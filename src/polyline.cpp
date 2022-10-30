@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <limits>
+
 
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/Convex_hull_traits_adapter_2.h>
@@ -28,7 +30,7 @@ void polyline::incremental(int init) {
 
         // write to output file
         // ======= TODO: measure time =======
-        this->write_to_file("Incremental");
+        // this->write_to_file("Incremental");
     } catch (...) {
         throw;
     }
@@ -142,10 +144,28 @@ void polyline::expand(int i) {
             // for every red find visible
             vis_edges = this->get_vis_edges(i, red_edges);
 
-            // choose visible
-            // todo choose visible line (edge_sel)
+            Segment replaceable_edge;
+            switch(edge_sel) {
+                case 1:
+                    // choose visible replaceable edge randomly
+                    replaceable_edge = vis_edges[std::rand() % vis_edges.size()];
+                    break;
+                case 2:
+                    // choose visible repleceable edge that adds min area
+                    replaceable_edge = min_area(vis_edges, i);
+                    break;
+                case 3:
+                    // choose visible repleceable edge that adds max area
+                    replaceable_edge = max_area(vis_edges, i);
+                    break;
+                default:
+                    throw "Error: Wrong edge_selection value!";
+            }
+            insert_point(replaceable_edge, i);
             i++; 
         }
+        // test
+        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) std::cout << it->source() << " " << it->target() << std::endl;
         return;
     } catch (...) {
         throw;
@@ -182,10 +202,6 @@ std::vector<Segment> polyline::get_red_edges(std::vector<Segment> prev, std::vec
 
     // red edges are the edges that are on the previous convex hull, but not the current one
     for (Segment line : prev) if ((*(std::find(curr.begin(), curr.end(), line)) == *curr.end()) && (line != *curr.end())) seg.push_back(line);
-    // test
-    std::cout << "RED EDGES" << std::endl;
-    for(auto it = seg.begin(); it != seg.end(); ++it) std::cout << it->source() << " " << it->target() << std::endl;
-
     return seg;
 }
 
@@ -212,22 +228,19 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
             // when the starting point of polyline is the same as the one of the red edge
             // possible visible edges exist
             if (red.source() == it->source()) {
-                do {
-                    int flag = 1;
+                while(red.target() != it->target()) {
                     // create edges connecting the start and end point 
                     // of the possible visible edge with the point
                     Segment red1(p, it->source()), red2(p, it->target());
                     // for each polyline edge check if it intersects with the edges created
                     // if at least one polyline intersects the possible visible edge is not visible
-                    for(Segment line : this->poly_line)
-                        if (intersection(red1, line) || intersection(red2, line)) {
-                            flag = 0;
-                            break;
-                        }
-                    if (flag == 1) seg.push_back(*it);
+                    if (is_vis(red1, red2)) seg.push_back(*it);
                     it++;
                     // stop when the end of a polyline edge is the same as of the red edge    
-                }while(red.target() != it->target());
+                }
+                // check the final edge "behind" the red ch edge for visibility
+                Segment red1(p, it->source()), red2(p, it->target());
+                if (is_vis(red1, red2)) seg.push_back(*it);
                 // found all visible edges for this red edge
                 break;
             }
@@ -235,12 +248,68 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
     }
     return seg;
 }
+// HAS POSSIBLE BUGS!!!!!
+bool polyline::is_vis(Segment red1, Segment red2) {
+        for(Segment line : this->poly_line) {
+            if (!(intersection(red1, line) && intersection(red2, line))) continue;
+            CGAL::Object result1 = intersection(red1, line);
+            CGAL::Object result2 = intersection(red2, line);
+            Point ipoint;
+            // check if the only point that intersects is the common point of the egdes
+            if (CGAL::assign(ipoint, result1) && !intersection(red2, line)) continue;
+            else if (CGAL::assign(ipoint, result2) && !intersection(red1, line)) continue;
+            else if (CGAL::assign(ipoint, result1) && CGAL::assign(ipoint, result2)) continue;
+                else {
+                    return false;
+                    break;
+                }
+        }
+        return true;
+}
+
+Segment polyline::min_area(std::vector<Segment> vis_edges,int i) {
+    Segment repleceable;
+    double min_area = std::numeric_limits<double>::max();
+    for(auto it = vis_edges.begin(); it != vis_edges.end(); ++it) {
+        double curr_area = CGAL::to_double(CGAL::area(it->source(), this->points[i], it->target()));
+        if (curr_area < min_area) {
+            min_area = curr_area;
+            repleceable = *it;
+        }
+    }
+    return repleceable;
+}
+
+Segment polyline::max_area(std::vector<Segment> vis_edges,int i) {
+    Segment repleceable;
+    double max_area = std::numeric_limits<double>::min();
+    for(auto it = vis_edges.begin(); it != vis_edges.end(); ++it) {
+        double curr_area = CGAL::area(it->source(), this->points[i], it->target());
+        if (curr_area > max_area) {
+            max_area = curr_area;
+            repleceable = *it;
+        }
+    }
+    return repleceable;
+}
+
+
+void polyline::insert_point(Segment repleceable_edge,int i) {
+    auto index = std::find(poly_line.begin(), poly_line.end(), repleceable_edge);
+    this->poly_line.insert(index, Segment(index->source(), this->points[i]));
+
+    index = std::find(poly_line.begin(), poly_line.end(), repleceable_edge);
+    this->poly_line.insert(index, Segment(this->points[i], index->target()));
+
+    index = std::find(poly_line.begin(), poly_line.end(), repleceable_edge);
+    this->poly_line.erase(index);
+}
 
 void polyline::write_to_file(std::string alg, int time) const {
     try {
         std::ofstream file(this->out_file, std::ios_base::app);
-        for (Point p : this->points) file << p->first << " " << p->second << std::endl;
-        for (Segment s : this->poly_line) file << s->source().first << " " << s->source().second << " " << s->target().first << " " << s->target().second << std::endl;
+        for (Point p : this->points) file << p.x() << " " << p.y() << std::endl;
+        for (Segment s : this->poly_line) file << s.source() << " " << s.target() << std::endl;
         file << "Algorithm: " << alg << "_" << this->edge_sel << std::endl;
         // TODO: ======= calculate polyline and convex_hull areas =======
         file << "Area: " << this->pl_area << std::endl;
