@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
-
+#include <chrono>
 
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/Convex_hull_traits_adapter_2.h>
@@ -18,7 +18,8 @@ typedef K::Intersect_2 Intersect;
 
 void polyline::incremental(int init) {
     try {
-        // ======= TODO: measure time =======
+        auto start = std::chrono::high_resolution_clock::now();
+
         // sort this->points
         this->sort_points(init);
 
@@ -28,9 +29,10 @@ void polyline::incremental(int init) {
         // expand polygon
         this->expand(i);
 
+        auto stop = std::chrono::high_resolution_clock::now();
+
         // write to output file
-        // ======= TODO: measure time =======
-        // this->write_to_file("Incremental");
+        this->write_to_file("Incremental", std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
     } catch (...) {
         throw;
     }
