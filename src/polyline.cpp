@@ -162,9 +162,15 @@ void polyline::expand(int i) {
                     throw "Error: Wrong edge_selection value!";
             }
             insert_point(replaceable_edge, i);
+
             i++; 
         }
-        // test
+        // create polygon for testing
+        Polygon p;
+        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) p.push_back(it->target());
+        if(p.is_simple()) std::cout << "SIMPLE" << std::endl;
+        else std::cout << "CONVEX" << std::endl;
+        std::cout << "POLYGON" << std::endl;
         for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) std::cout << it->source() << " " << it->target() << std::endl;
         return;
     } catch (...) {
@@ -202,6 +208,7 @@ std::vector<Segment> polyline::get_red_edges(std::vector<Segment> prev, std::vec
 
     // red edges are the edges that are on the previous convex hull, but not the current one
     for (Segment line : prev) if ((*(std::find(curr.begin(), curr.end(), line)) == *curr.end()) && (line != *curr.end())) seg.push_back(line);
+    
     return seg;
 }
 
@@ -246,24 +253,26 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
             }
         }
     }
+
     return seg;
 }
-// HAS POSSIBLE BUGS DECIDING IF EDGE IS VISIBLE!!!!!
 bool polyline::is_vis(Segment red1, Segment red2) {
         for(Segment line : this->poly_line) {
-            if (!(intersection(red1, line) && intersection(red2, line))) continue;
+            if ((line.source() == red1.target()) && (line.target() == red2.target())) continue;
+            if (!intersection(red1, line) && !intersection(red2, line)) continue;
+            if (intersection(red1, line) && intersection(red2, line)) return false;
             CGAL::Object result1 = intersection(red1, line);
             CGAL::Object result2 = intersection(red2, line);
             Point ipoint;
+            Point ipoint1;
+            Segment iseg;
+             
             // check if the only point that intersects is the common point of the egdes
-            if (CGAL::assign(ipoint, result1) && !intersection(red2, line)) continue;
-            else if (CGAL::assign(ipoint, result2) && !intersection(red1, line)) continue;
-            else if (CGAL::assign(ipoint, result1) && CGAL::assign(ipoint, result2)) continue;
-                else {
-                    return false;
-                    break;
-                }
+            if (CGAL::assign(ipoint, result1) && !intersection(red2, line) && ipoint != red1.target())  return false;          
+            if (CGAL::assign(ipoint, result2) && !intersection(red1, line) && ipoint != red2.target()) return false;
+            if (CGAL::assign(iseg, result1) || CGAL::assign(iseg, result2)) return false;
         }
+
         return true;
 }
 
