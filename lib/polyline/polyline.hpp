@@ -18,6 +18,7 @@ class polyline {
         std::vector<Point> pl_points;
         std::vector<Segment> poly_line;
         int edge_sel;
+        std::string init;
         std::string out_file;
         int pl_area;
         int ch_area;
@@ -29,7 +30,7 @@ class polyline {
         Segment min_area(std::vector<Segment>, int);
         Segment max_area(std::vector<Segment>, int);
         void insert_point(Segment, int);
-        std::vector<Point> get_ch(int);
+        std::vector<Point> get_ch();
         std::vector<Segment> get_segment(std::vector<Point>);
         std::vector<Segment> get_red_edges(std::vector<Segment>, std::vector<Segment>);
         std::vector<Segment> get_vis_edges(int, std::vector<Segment>);

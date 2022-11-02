@@ -126,20 +126,41 @@ void polyline::expand(int i) {
         std::vector<Segment> red_edges;
         std::vector<Segment> vis_edges;
         // get convex hull of current polygon points
-        curr_ch = get_ch(i - 1);
+        curr_ch = get_ch();
         while (i < this->points.size()) {
+            Point p = this->points[i];
             // insert next point to polygon line points
             this->pl_points.push_back(this->points[i]);
             
             prev_ch = curr_ch;
             prev_ch_segment = this->get_segment(prev_ch);
             // get convex hull of current polygon points plus the next point to add
-            curr_ch = get_ch(i);
+            curr_ch = get_ch();
             curr_ch_segment = this->get_segment(curr_ch);
             // red lines of current convex hull are the ones removed from previous convex hull
             // compare the two segments to get red lines 
             red_edges = this->get_red_edges(prev_ch_segment, curr_ch_segment);
-            
+
+            // point has the same x or y coordinate (depends of sorting) as a prev one
+            if (red_edges.size() == 0) {
+                if (!this->init.compare("1a") || this->init.compare("1b")) {
+                    // find red edes
+                    for (auto it = curr_ch_segment.begin(); it != curr_ch_segment.end(); it++) {
+
+                        if(it->source().x() == p.x() || it->target().x() == p.x())
+                            red_edges.push_back(*it);
+                    }
+                }
+                else if (!this->init.compare("2a") || this->init.compare("2b")) {
+                    // find red edes
+                    for (auto it = curr_ch_segment.begin(); it != curr_ch_segment.end(); it++) {
+
+                        if(it->source().y() == p.y() || it->target().y() == p.y())
+                            red_edges.push_back(*it);
+                    }
+                }
+            }
+
             // for every red find visible
             vis_edges = this->get_vis_edges(i, red_edges);
             
@@ -178,7 +199,7 @@ void polyline::expand(int i) {
     }
 }
 
-std::vector<Point> polyline::get_ch(int i) {
+std::vector<Point> polyline::get_ch() {
     std::vector<Point> curr_ch;
             
     std::vector<std::size_t> indices(this->pl_points.size()), out;
@@ -286,7 +307,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                 }
             }   
         }
-    
+
     return seg;
 }
 bool polyline::is_vis(Segment red1, Segment red2) {
@@ -370,7 +391,7 @@ void polyline::write_to_file(std::string alg, int time) const {
     return;
 }
 
-polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, std::string edge_sel, std::string init, std::string out_file): out_file(out_file) {
+polyline::polyline(std::vector<std::pair<float, float>> vec, std::string alg, std::string edge_sel, std::string init, std::string out_file): out_file(out_file), init(init) {
     //initialize points
     for(auto it = vec.begin(); it != vec.end(); ++it) this->points.push_back(Point(it->first, it->second));
     this->edge_sel = std::stoi(edge_sel);
