@@ -24,7 +24,7 @@ void polyline::incremental(int init) {
         this->sort_points(init);
 
         // initialize polygon
-        int i = this->init_polygon();
+        int i = this->init_triangle();
 
         // expand polygon
         this->expand(i);
@@ -56,30 +56,34 @@ void polyline::sort_points(int type) {
                 return (a.x() > b.x());
             });
             break;
+
         case 2:
             // sort x ascending
             std::sort(this->points.begin(), this->points.end(), [] (const Point &a, const Point &b) {
                 return (a.x() < b.x());
             });
             break;
+
         case 3:
             // sort y descending
             std::sort(this->points.begin(), this->points.end(), [] (const Point &a, const Point &b) {
                 return (a.y() > b.y());
             });
             break;
+
         case 4:
             // sort y ascending
             std::sort(this->points.begin(), this->points.end(), [] (const Point &a, const Point &b) {
                 return (a.y() < b.y());
             });
             break;
+
         default:
             throw "Error: Couldn't sort vector";
     }
 }
 
-int polyline::init_polygon(void) {
+int polyline::init_triangle(void) {
     try {
         this->pl_points.push_back(this->points[0]);
         this->pl_points.push_back(this->points[1]);
@@ -103,12 +107,14 @@ int polyline::init_polygon(void) {
             //create next segment
             this->pl_points.push_back(this->points[i]);
             this->poly_line.push_back(Segment(this->points[i - 1], this->points[i]));
+
             if (!CGAL::collinear(this->points[0], this->points[1], this->points[i])) {
                 flag = 0;
 
                 //point i is not collinear so triangle can be closed
                 this->poly_line.push_back(Segment(this->points[i], this->points[0]));
             }
+
             i++;
         } while (flag);
 
@@ -135,11 +141,13 @@ void polyline::expand(int i) {
 
         // get convex hull of current polygon points
         curr_ch = get_ch();
+
         while (i < this->points.size()) {
             Point p = this->points[i];
+
             // insert next point to polygon line points
             this->pl_points.push_back(this->points[i]);
-            
+
             prev_ch = curr_ch;
             prev_ch_segment = this->get_segment(prev_ch);
 
@@ -153,18 +161,18 @@ void polyline::expand(int i) {
 
             // point has the same x or y coordinate (depends of sorting) as a prev one
             if (red_edges.size() == 0) {
+
                 if (!this->init.compare("1a") || this->init.compare("1b")) {
+
                     // find red edes
                     for (auto it = curr_ch_segment.begin(); it != curr_ch_segment.end(); it++) {
-
                         if(it->source().x() == p.x() || it->target().x() == p.x())
                             red_edges.push_back(*it);
                     }
-                }
-                else if (!this->init.compare("2a") || this->init.compare("2b")) {
+                } else if (!this->init.compare("2a") || this->init.compare("2b")) {
+
                     // find red edes
                     for (auto it = curr_ch_segment.begin(); it != curr_ch_segment.end(); it++) {
-
                         if(it->source().y() == p.y() || it->target().y() == p.y())
                             red_edges.push_back(*it);
                     }
@@ -173,21 +181,24 @@ void polyline::expand(int i) {
 
             // for every red find visible
             vis_edges = this->get_vis_edges(i, red_edges);
-            
+
             Segment replaceable_edge;
             switch(edge_sel) {
                 case 1:
                     // choose visible replaceable edge randomly
                     replaceable_edge = vis_edges[std::rand() % vis_edges.size()];
                     break;
+
                 case 2:
                     // choose visible repleceable edge that adds min area
                     replaceable_edge = min_area(vis_edges, i);
                     break;
+
                 case 3:
                     // choose visible repleceable edge that adds max area
                     replaceable_edge = max_area(vis_edges, i);
                     break;
+
                 default:
                     throw "Error: Wrong edge_selection value!";
             }
@@ -214,9 +225,9 @@ void polyline::expand(int i) {
 
 std::vector<Point> polyline::get_ch(void) {
     std::vector<Point> curr_ch;
-            
+
     std::vector<std::size_t> indices(this->pl_points.size()), out;
-    std::iota(indices.begin(), indices.end(),0);
+    std::iota(indices.begin(), indices.end(), 0);
 
     CGAL::convex_hull_2(indices.begin(), indices.end(), std::back_inserter(out), Convex_hull_traits_2(CGAL::make_property_map(this->pl_points)));
 
@@ -274,6 +285,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
             // when the starting point of polyline is the same as the one of the red edge
             // possible visible edges exist
             if (red.source() == it->source() ) {
+
                 while(red.target() != it->target() && it != this->poly_line.end()) {
                     // create edges connecting the start and end point 
                     // of the possible visible edge with the point
@@ -299,6 +311,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
     if (seg.size() == 0){
         int flag = 1;
         for (Segment red : red_edges) {
+
             for (Segment line : this->poly_line) {
                 if (red.source() == line.target() && red.target() == line.source() ) {
                     flag = 0;
@@ -311,6 +324,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
             // if red edge is part of the polyline there no more visible edges
             if(flag == 0) continue;
             for (auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) {
+
                 if (red.target() == it->source()) {
                     while(red.source() != it->target()) {
                         // create edges connecting the start and end point 
@@ -328,18 +342,18 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                     if (is_vis(red1, red2)) seg.push_back(*it);
                     // found all visible edges for this red edge
                     break;
-    
+
                 }
             }
         }   
     }
     std::cout << "VISIBLE " << std::endl;
     for (auto it = seg.begin(); it != seg.end(); it++) std::cout << it->source() << " " << it->target() << std::endl;
-    
+
     return seg;
 }
 
-bool polyline::is_vis(Segment red1, Segment red2) {
+bool polyline::is_vis(Segment red1, Segment red2) const {
         for(Segment line : this->poly_line) {
             if ((line.source() == red1.target()) && (line.target() == red2.target())) continue;
             if (!intersection(red1, line) && !intersection(red2, line)) continue;
@@ -358,7 +372,7 @@ bool polyline::is_vis(Segment red1, Segment red2) {
         return true;
 }
 
-Segment polyline::min_area(std::vector<Segment> vis_edges,int i) {
+Segment polyline::min_area(std::vector<Segment> vis_edges, int i) const {
     Segment repleceable;
     double min_area = std::numeric_limits<double>::max();
     for(auto it = vis_edges.begin(); it != vis_edges.end(); ++it) {
@@ -371,7 +385,7 @@ Segment polyline::min_area(std::vector<Segment> vis_edges,int i) {
     return repleceable;
 }
 
-Segment polyline::max_area(std::vector<Segment> vis_edges,int i) {
+Segment polyline::max_area(std::vector<Segment> vis_edges, int i) const {
     Segment repleceable;
     double max_area = std::numeric_limits<double>::min();
     for(auto it = vis_edges.begin(); it != vis_edges.end(); ++it) {
@@ -384,7 +398,7 @@ Segment polyline::max_area(std::vector<Segment> vis_edges,int i) {
     return repleceable;
 }
 
-void polyline::insert_point(Segment repleceable_edge,int i) {
+void polyline::insert_point(Segment repleceable_edge, int i) {
     // remove point to add it to the right place
     this->pl_points.pop_back();
     std::cout <<  "REPLACEABLE " << repleceable_edge.source() << " " << repleceable_edge.target() << std::endl;
