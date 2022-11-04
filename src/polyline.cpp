@@ -54,8 +54,8 @@ void polyline::convex_hull(void) {
         // initialize polyline to be the convex_hull of all the points
         for (int i = 0; i < ch.size(); i++) {
             this->pl_points.push_back(ch[i]);
-            if (i < ch.size() - 1) this->poly_line.push_back(Segment(ch[i]), ch[i + 1]);
-            else this->poly_line.push_back(Segment(ch[i]), ch[0]);
+            if (i < ch.size() - 1) this->poly_line.push_back(Segment(ch[i], ch[i + 1]));
+            else this->poly_line.push_back(Segment(ch[i], ch[0]));
         }
 
         for (Segment edge : this->poly_line) {
