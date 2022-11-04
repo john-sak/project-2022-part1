@@ -41,7 +41,31 @@ void polyline::incremental(int init) {
 
 void polyline::convex_hull(void) {
     try {
-        // convex hull
+        auto start = std::chrono::high_resolution_clock::now();
+
+        // get convex_hull of all points
+        std::vector<Point> ch;
+        std::vector<std::size_t> indices(this->points.size()), out;
+        std::iota(indices.begin(), indices.end(), 0);
+
+        CGAL::convex_hull_2(indices.begin(), indices.end(), std::back_inserter(out), Convex_hull_traits_2(CGAL::make_property_map(this->points)));
+        for (std::size_t j : out) ch.push_back(this->points[j]);
+
+        // initialize polyline to be the convex_hull of all the points
+        for (int i = 0; i < ch.size(); i++) {
+            this->pl_points.push_back(ch[i]);
+            if (i < ch.size() - 1) this->poly_line.push_back(Segment(ch[i]), ch[i + 1]);
+            else this->poly_line.push_back(Segment(ch[i]), ch[0]);
+        }
+
+        for (Segment edge : this->poly_line) {
+            // TODO
+        }
+
+        auto stop = std::chrono::high_resolution_clock::now();
+
+        // write to output file
+        this->write_to_file("Convex_Hull", std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
     } catch (...) {
         throw;
     }
