@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
-
+#include <chrono>
 
 #include <CGAL/convex_hull_2.h>
 #include <CGAL/Convex_hull_traits_adapter_2.h>
@@ -18,8 +18,9 @@ typedef K::Intersect_2 Intersect;
 
 void polyline::incremental(int init) {
     try {
-        // ======= TODO: measure time =======
-        // sort this->points
+        auto start = std::chrono::high_resolution_clock::now();
+
+        // sort points
         this->sort_points(init);
 
         // initialize polygon
@@ -28,9 +29,10 @@ void polyline::incremental(int init) {
         // expand polygon
         this->expand(i);
 
+        auto stop = std::chrono::high_resolution_clock::now();
+
         // write to output file
-        // ======= TODO: measure time =======
-        // this->write_to_file("Incremental");
+        this->write_to_file("Incremental", std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count());
     } catch (...) {
         throw;
     }
@@ -85,15 +87,17 @@ int polyline::init_polygon(void) {
 
         this->poly_line.push_back(Segment(this->points[0], this->points[1]));
         this->poly_line.push_back(Segment(this->points[1], this->points[2]));
+
         //if three initial points are not collinear triangle can be created
         if (!CGAL::collinear(this->points[0], this->points[1], this->points[2])) {
             this->poly_line.push_back(Segment(this->points[2], this->points[0]));
             return 3;
         }
+
         //if initial points are collinear 
         int i = 3;
-        //collinearity flag
         int flag = 1;
+
         // stop when the first non collinear point is found
         do {
             //create next segment
@@ -101,11 +105,13 @@ int polyline::init_polygon(void) {
             this->poly_line.push_back(Segment(this->points[i - 1], this->points[i]));
             if (!CGAL::collinear(this->points[0], this->points[1], this->points[i])) {
                 flag = 0;
+
                 //point i is not collinear so triangle can be closed
                 this->poly_line.push_back(Segment(this->points[i], this->points[0]));
             }
             i++;
         } while (flag);
+
         // return number of points needed for triangle creation
         return i;
     } catch (...) {
@@ -117,6 +123,7 @@ void polyline::expand(int i) {
     try {
         // current convex hull variable
         std::vector<Point> curr_ch;
+
         // previous convex hull variable
         std::vector<Point> prev_ch;
 
@@ -125,6 +132,7 @@ void polyline::expand(int i) {
 
         std::vector<Segment> red_edges;
         std::vector<Segment> vis_edges;
+
         // get convex hull of current polygon points
         curr_ch = get_ch();
         while (i < this->points.size()) {
@@ -134,9 +142,11 @@ void polyline::expand(int i) {
             
             prev_ch = curr_ch;
             prev_ch_segment = this->get_segment(prev_ch);
+
             // get convex hull of current polygon points plus the next point to add
             curr_ch = get_ch();
             curr_ch_segment = this->get_segment(curr_ch);
+
             // red lines of current convex hull are the ones removed from previous convex hull
             // compare the two segments to get red lines 
             red_edges = this->get_red_edges(prev_ch_segment, curr_ch_segment);
@@ -184,16 +194,17 @@ void polyline::expand(int i) {
             std::cout << "POLYGON" << std::endl;
             for (auto it = poly_line.begin(); it != poly_line.end(); it++) std::cout << it->source() << " " << it->target() << std::endl;
             insert_point(replaceable_edge, i);
-
             i++; 
         }
-        // create polygon for testing
+
+        // TESTING
         Polygon p;
         for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) p.push_back(it->target());
         if(p.is_simple()) std::cout << "SIMPLE" << std::endl;
         else std::cout << "CONVEX" << std::endl;
         std::cout << "POLYGON" << std::endl;
         for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) std::cout << it->source() << " " << it->target() << std::endl;
+        // TESTING
 
         return;
     } catch (...) {
@@ -201,13 +212,14 @@ void polyline::expand(int i) {
     }
 }
 
-std::vector<Point> polyline::get_ch() {
+std::vector<Point> polyline::get_ch(void) {
     std::vector<Point> curr_ch;
             
     std::vector<std::size_t> indices(this->pl_points.size()), out;
     std::iota(indices.begin(), indices.end(),0);
 
     CGAL::convex_hull_2(indices.begin(), indices.end(), std::back_inserter(out), Convex_hull_traits_2(CGAL::make_property_map(this->pl_points)));
+
     // push back points to current convex hull variable
     for(std::size_t j : out) curr_ch.push_back(this->pl_points[j]);
 
@@ -216,12 +228,13 @@ std::vector<Point> polyline::get_ch() {
 
 std::vector<Segment> polyline::get_segment(std::vector<Point> points) {
     std::vector<Segment> seg;
-    int i = 0;
 
+    int i = 0;
     while(i != (points.size() - 1)) {
         seg.push_back(Segment(points[i], points[i+1]));
         i++;    
     }
+
     seg.push_back(Segment(points[points.size() - 1], points[0]));
     return seg;
 }
@@ -252,8 +265,10 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                 break;
             }
         }
+
         // if red edge is part of the polyline there no more visible edges
         if(flag == 0) continue;
+
         // if red edge is not part of polyline
         for (auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) {
             // when the starting point of polyline is the same as the one of the red edge
@@ -263,6 +278,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                     // create edges connecting the start and end point 
                     // of the possible visible edge with the point
                     Segment red1(p, it->source()), red2(p, it->target());
+
                     // for each polyline edge check if it intersects with the edges created
                     // if at least one polyline intersects the possible visible edge is not visible
                     if (is_vis(red1, red2)) seg.push_back(Segment(it->source(), it->target()));
@@ -272,6 +288,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                     it++;
                     // stop when the end of a polyline edge is the same as of the red edge    
                 }
+
                 Segment red1(p, it->source()), red2(p, it->target());
                 if (is_vis(red1, red2)) seg.push_back(*it);
                 // found all visible edges for this red edge
@@ -279,46 +296,49 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
             }
         }
     }
-        if (seg.size() == 0){
-            int flag = 1;
-            for (Segment red : red_edges) {
-                for (Segment line : this->poly_line) {
-                    if (red.source() == line.target() && red.target() == line.source() ) {
-                        std::cout << "IM HERE " << std::endl;
-                        flag = 0;
-                        seg.push_back(line);
-                        break;
-                    }
+    if (seg.size() == 0){
+        int flag = 1;
+        for (Segment red : red_edges) {
+            for (Segment line : this->poly_line) {
+                if (red.source() == line.target() && red.target() == line.source() ) {
+                    flag = 0;
+                    std::cout << "IM HERE " << std::endl;
+                    seg.push_back(line);
+                    break;
                 }
-                // if red edge is part of the polyline there no more visible edges
-                if(flag == 0) continue;
+            }
 
-                for (auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) {
-                    if (red.target() == it->source()) {
-                        while(red.source() != it->target()) {
-                            // create edges connecting the start and end point 
-                            // of the possible visible edge with the point
-                                Segment red1(p, it->source()), red2(p, it->target());
-                            // for each polyline edge check if it intersects with the edges created
-                            // if at least one polyline intersects the possible visible edge is not visible
-                            if (is_vis(red1, red2)) seg.push_back(*it);
-                            it++;
-                            // stop when the end of a polyline edge is the same as of the red edge    
-                        }
+            // if red edge is part of the polyline there no more visible edges
+            if(flag == 0) continue;
+            for (auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) {
+                if (red.target() == it->source()) {
+                    while(red.source() != it->target()) {
+                        // create edges connecting the start and end point 
+                        // of the possible visible edge with the point
                         Segment red1(p, it->source()), red2(p, it->target());
+
+                        // for each polyline edge check if it intersects with the edges created
+                        // if at least one polyline intersects the possible visible edge is not visible
                         if (is_vis(red1, red2)) seg.push_back(*it);
-                        // found all visible edges for this red edge
-                        break;
-     
+                        it++;
+                        // stop when the end of a polyline edge is the same as of the red edge    
                     }
+
+                    Segment red1(p, it->source()), red2(p, it->target());
+                    if (is_vis(red1, red2)) seg.push_back(*it);
+                    // found all visible edges for this red edge
+                    break;
+    
                 }
-            }   
-        }
+            }
+        }   
+    }
     std::cout << "VISIBLE " << std::endl;
     for (auto it = seg.begin(); it != seg.end(); it++) std::cout << it->source() << " " << it->target() << std::endl;
-
+    
     return seg;
 }
+
 bool polyline::is_vis(Segment red1, Segment red2) {
         for(Segment line : this->poly_line) {
             if ((line.source() == red1.target()) && (line.target() == red2.target())) continue;
@@ -329,7 +349,7 @@ bool polyline::is_vis(Segment red1, Segment red2) {
             Point ipoint;
             Point ipoint1;
             Segment iseg;
-             
+
             // check if the only point that intersects is the common point of the egdes
             if (CGAL::assign(ipoint, result1) && !intersection(red2, line) && ipoint != red1.target())  return false;          
             if (CGAL::assign(ipoint, result2) && !intersection(red1, line) && ipoint != red2.target()) return false;
