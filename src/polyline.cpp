@@ -67,7 +67,7 @@ void polyline::convex_hull(void) {
             // ===== TODO =====
 
             // insert p to polyline and remove this->poly_line[i]
-            this->insert_point(this->poly_line[i], p_index);
+            this->insert_point(this->poly_line[i], p_index); // !!! --> mikro issue, h insert_point kanei this->poly_line.insert, emeis 9eloume this->polyline.push_back
 
             // increment the size of the polyline
             size += 2;
