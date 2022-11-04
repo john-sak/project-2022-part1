@@ -58,8 +58,19 @@ void polyline::convex_hull(void) {
             else this->poly_line.push_back(Segment(ch[i], ch[0]));
         }
 
-        for (Segment edge : this->poly_line) {
-            // TODO
+        // for every edge in poly_line, find the closest visible point p and add it to the polyline
+        // when there are no more edges to go through, we are done
+        std::vector<Segment>::size_type size = this->poly_line.size();
+        for (std::vector<Segment>::size_type i = 0; i < size; i++) {
+            // ===== TODO =====
+            // find closest visible point p and let p_index be the index of point p
+            // ===== TODO =====
+
+            // insert p to polyline and remove this->poly_line[i]
+            this->insert_point(this->poly_line[i], p_index);
+
+            // increment the size of the polyline
+            size += 2;
         }
 
         auto stop = std::chrono::high_resolution_clock::now();
