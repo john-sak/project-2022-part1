@@ -260,12 +260,12 @@ void polyline::expand(int i) {
                     break;
 
                 case 2:
-                    // choose visible repleceable edge that adds min area
+                    // choose visible replaceable edge that adds min area
                     replaceable_edge = min_area(vis_edges, i);
                     break;
 
                 case 3:
-                    // choose visible repleceable edge that adds max area
+                    // choose visible replaceable edge that adds max area
                     replaceable_edge = max_area(vis_edges, i);
                     break;
 
@@ -278,18 +278,18 @@ void polyline::expand(int i) {
 
             // remove point to add it to the right place
             this->pl_points.pop_back();
-            std::cout <<  "REPLACEABLE " << repleceable_edge.source() << " " << repleceable_edge.target() << std::endl;
+            std::cout <<  "REPLACEABLE " << replaceable_edge.source() << " " << replaceable_edge.target() << std::endl;
             //insert segment
-            auto index = std::find(poly_line.begin(), poly_line.end(), repleceable_edge);
-            this->poly_line.insert(index, Segment(repleceable_edge.source(), this->points[i]));
-            index = std::find(poly_line.begin(), poly_line.end(), repleceable_edge);
+            auto index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
+            this->poly_line.insert(index, Segment(replaceable_edge.source(), this->points[i]));
+            index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
             std::cout <<  "FOUND " << index->source() << " " << index->target() << std::endl;
-            this->poly_line.insert(index, Segment(this->points[i], repleceable_edge.target()));
-            index = std::find(poly_line.begin(), poly_line.end(), repleceable_edge);
+            this->poly_line.insert(index, Segment(this->points[i], replaceable_edge.target()));
+            index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
             this->poly_line.erase(index);
 
             //insert point
-            auto pindex = std::find(pl_points.begin(), pl_points.end(), repleceable_edge.target());
+            auto pindex = std::find(pl_points.begin(), pl_points.end(), replaceable_edge.target());
             if (pindex == this->pl_points.begin()) this->pl_points.push_back(this->points[i]);
             else this->pl_points.insert(pindex, this->points[i]);
 
@@ -482,16 +482,16 @@ bool polyline::is_vis(Segment red1, Segment red2) const {
 
 Segment polyline::min_area(std::vector<Segment> vis_edges, int i) const {
     try {
-        Segment repleceable;
+        Segment replaceable;
         double min_area = std::numeric_limits<double>::max();
         for(auto it = vis_edges.begin(); it != vis_edges.end(); ++it) {
             double curr_area = std::abs(CGAL::area(it->source(), this->points[i], it->target()));
             if (curr_area < min_area) {
                 min_area = curr_area;
-                repleceable = *it;
+                replaceable = *it;
             }
         }
-        return repleceable;
+        return replaceable;
     } catch (...) {
         throw;
     }
@@ -499,16 +499,16 @@ Segment polyline::min_area(std::vector<Segment> vis_edges, int i) const {
 
 Segment polyline::max_area(std::vector<Segment> vis_edges, int i) const {
     try {
-        Segment repleceable;
+        Segment replaceable;
         double max_area = std::numeric_limits<double>::min();
         for(auto it = vis_edges.begin(); it != vis_edges.end(); ++it) {
             double curr_area = std::abs(CGAL::area(it->source(), this->points[i], it->target()));
             if (curr_area > max_area) {
                 max_area = curr_area;
-                repleceable = *it;
+                replaceable = *it;
             }
         }
-        return repleceable;
+        return replaceable;
     } catch (...) {
         throw;
     }
