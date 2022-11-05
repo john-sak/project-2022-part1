@@ -10,6 +10,7 @@
 #include <CGAL/Convex_hull_traits_adapter_2.h>
 #include <CGAL/property_map.h>
 #include <CGAL/intersections.h>
+#include <CGAL/squared_distance_2.h>
 
 #include <polyline.hpp>
 
@@ -62,14 +63,40 @@ void polyline::convex_hull(void) {
         // when there are no more edges to go through, we are done
         std::vector<Segment>::size_type size = this->poly_line.size();
         for (std::vector<Segment>::size_type i = 0; i < size; i++) {
-            // ===== TODO =====
+            // for every edge on the polyline
+            Segment edge = this->poly_line[i];
+
             // find closest visible point p and let p_index be the index of point p
-            // ===== TODO =====
+            int min, found = 0, p_index;
+            for (int j = 0; j < this->points.size(); j++) {
+                // for every point
+                Point p = this->points[j];
+
+                // if p is in this->pl_points, continue
+                if (!((*(std::find(this->pl_points.begin(), this->pl_points.end(), p)) == *this->pl_points.end()) && (p != *this->pl_points.end()))) continue;
+
+                // if edge is not visible by p, continue
+                // ===== TODO =====
+
+                // find closest visible point
+                int dist = CGAL::squared_distance(edge, p);
+                if (found == 0) {
+                    p_index = j;
+                    min = dist;
+                    found = 1;
+                } else if (dist < min) {
+                    p_index = j;
+                    min = dist;
+                }
+            }
+
+            // if no visible points exist for this edge, continue to the next one
+            if (found == 0) continue;
 
             // insert p to polyline and remove this->poly_line[i]
             this->insert_point(this->poly_line[i], p_index); // !!! --> mikro issue, h insert_point kanei this->poly_line.insert, emeis 9eloume this->polyline.push_back
 
-            // increment the size of the polyline
+            // increment the size of the polyline to go through the edges we just added
             size += 2;
         }
 
