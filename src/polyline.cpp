@@ -76,7 +76,8 @@ void polyline::convex_hull(void) {
                 if (!((*(std::find(this->pl_points.begin(), this->pl_points.end(), p)) == *this->pl_points.end()) && (p != *this->pl_points.end()))) continue;
 
                 // if edge is not visible by p, continue
-                // ===== TODO =====
+                Segment edge1(p, edge.source()), edge2(p, edge.target());
+                if (!this->is_vis(edge1, edge2)) continue;
 
                 // find closest visible point
                 int dist = CGAL::squared_distance(edge, p);
@@ -94,10 +95,17 @@ void polyline::convex_hull(void) {
             if (found == 0) continue;
 
             // insert p to polyline and remove this->poly_line[i]
-            this->insert_point(this->poly_line[i], p_index); // !!! --> mikro issue, h insert_point kanei this->poly_line.insert, emeis 9eloume this->polyline.push_back
+            this->poly_line.push_back(Segment(edge.source(), this->points[p_index]));
+            this->poly_line.push_back(Segment(this->points[p_index], edge.target()));
+
+            auto index = std::find(poly_line.begin(), poly_line.end(), edge);
+            this->poly_line.erase(index);
+            i--;
+
+            this->pl_points.push_back(this->points[p_index]);
 
             // increment the size of the polyline to go through the edges we just added
-            size += 2;
+            size++;
         }
 
         auto stop = std::chrono::high_resolution_clock::now();
