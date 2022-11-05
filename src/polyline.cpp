@@ -272,18 +272,16 @@ void polyline::expand(int i) {
                 default:
                     throw "Error: Wrong edge_selection value!";
             }
-            std::cout << "POLYGON" << std::endl;
-            for (auto it = poly_line.begin(); it != poly_line.end(); it++) std::cout << it->source() << " " << it->target() << std::endl;
-            // insert_point(replaceable_edge, i);
 
             // remove point to add it to the right place
             this->pl_points.pop_back();
-            std::cout <<  "REPLACEABLE " << replaceable_edge.source() << " " << replaceable_edge.target() << std::endl;
+            // std::cout <<  "REPLACEABLE " << replaceable_edge.source() << " " << replaceable_edge.target() << std::endl;
+
             //insert segment
             auto index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
             this->poly_line.insert(index, Segment(replaceable_edge.source(), this->points[i]));
             index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
-            std::cout <<  "FOUND " << index->source() << " " << index->target() << std::endl;
+            // std::cout <<  "FOUND " << index->source() << " " << index->target() << std::endl;
             this->poly_line.insert(index, Segment(this->points[i], replaceable_edge.target()));
             index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
             this->poly_line.erase(index);
@@ -295,15 +293,6 @@ void polyline::expand(int i) {
 
             i++; 
         }
-
-        // TESTING
-        Polygon p;
-        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) p.push_back(it->target());
-        if(p.is_simple()) std::cout << "SIMPLE" << std::endl;
-        else std::cout << "CONVEX" << std::endl;
-        std::cout << "POLYGON" << std::endl;
-        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) std::cout << it->source() << " " << it->target() << std::endl;
-        // TESTING
 
         return;
     } catch (...) {
@@ -352,8 +341,7 @@ std::vector<Segment> polyline::get_red_edges(std::vector<Segment> prev, std::vec
 
         // red edges are the edges that are on the previous convex hull, but not the current one
         for (Segment line : prev) if ((*(std::find(curr.begin(), curr.end(), line)) == *curr.end()) && (line != *curr.end())) seg.push_back(line);
-        std::cout << "RED " << std::endl;
-        for (auto it = seg.begin(); it != seg.end(); it++) std::cout << it->source() << " " << it->target() << std::endl;
+
         return seg;
     } catch (...) {
         throw;
@@ -395,8 +383,6 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                         // for each polyline edge check if it intersects with the edges created
                         // if at least one polyline intersects the possible visible edge is not visible
                         if (is_vis(red1, red2)) seg.push_back(Segment(it->source(), it->target()));
-                        std::cout << "VISIBLE " << std::endl;
-                        for (auto i = seg.begin(); i != seg.end(); i++) std::cout << i->source() << " " << i->target() << std::endl;
 
                         it++;
                         // stop when the end of a polyline edge is the same as of the red edge    
@@ -416,7 +402,6 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                 for (Segment line : this->poly_line) {
                     if (red.source() == line.target() && red.target() == line.source() ) {
                         flag = 0;
-                        std::cout << "IM HERE " << std::endl;
                         seg.push_back(line);
                         break;
                     }
@@ -448,8 +433,6 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                 }
             }   
         }
-        std::cout << "VISIBLE " << std::endl;
-        for (auto it = seg.begin(); it != seg.end(); it++) std::cout << it->source() << " " << it->target() << std::endl;
 
         return seg;
     } catch (...) {
@@ -474,6 +457,7 @@ bool polyline::is_vis(Segment red1, Segment red2) const {
             if (CGAL::assign(ipoint, result2) && !intersection(red1, line) && ipoint != red2.target()) return false;
             if (CGAL::assign(iseg, result1) || CGAL::assign(iseg, result2)) return false;
         }
+
         return true;
     } catch (...) {
         throw;
@@ -491,6 +475,7 @@ Segment polyline::min_area(std::vector<Segment> vis_edges, int i) const {
                 replaceable = *it;
             }
         }
+
         return replaceable;
     } catch (...) {
         throw;
@@ -508,6 +493,7 @@ Segment polyline::max_area(std::vector<Segment> vis_edges, int i) const {
                 replaceable = *it;
             }
         }
+
         return replaceable;
     } catch (...) {
         throw;
@@ -522,10 +508,8 @@ void polyline::write_to_file(std::string alg, int time) const {
         for (Segment s : this->poly_line) file << s.source() << " " << s.target() << std::endl;
         file << "Algorithm: " << alg << "_" << this->edge_sel << std::endl;
         // TODO: ======= calculate polyline and convex_hull areas =======
-        // file << "Area: " << this->pl_area << std::endl;
-        // file << "Ratio: " << (this->pl_area / this->ch_area) << std::endl;
-        file << "Area: " << -1 << std::endl;
-        file << "Ratio: " << -1 << std::endl;
+        file << "Area: " << this->pl_area << std::endl;
+        file << "Ratio: " << (this->pl_area / this->ch_area) << std::endl;
         file << "Construction time: " << time << " msec" << std::endl;
         file.close();
     } catch (...) {
