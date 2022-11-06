@@ -20,8 +20,8 @@ class polyline {
         int edge_sel;
         std::string init;
         std::string out_file;
-        int pl_area;
-        int ch_area;
+        float pl_area;
+        float ch_area;
         void incremental(int);
         void convex_hull(void);
         void sort_points(int);

@@ -32,11 +32,13 @@ void polyline::incremental(int init) {
         this->expand(i);
 
         Polygon pl;
-        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) p.push_back(it->target());
-        this->pl_area = std::abs(pl.polygon_area_2());
+        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) pl.push_back(it->target());
+        this->pl_area = std::abs(pl.area());
 
-        Polygon ch(this->get_ch(this->points));
-        this->ch_area = std::abs(ch.polygon_area_2());
+        Polygon ch;
+        std::vector<Point> ch_points = this->get_ch(this->points);
+        for (auto it = ch_points.begin(); it != ch_points.end(); ++it) ch.push_back(*it);
+        this->ch_area = std::abs(ch.area());
 
         auto stop = std::chrono::high_resolution_clock::now();
 
