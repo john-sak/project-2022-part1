@@ -29,10 +29,12 @@ void polyline::incremental(int init) {
 
         // expand polygon
         this->expand(i);
+
         //get polygon area
         Polygon pl_poly;
         for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) pl_poly.push_back(it->target());
         this->pl_area = std::abs(pl_poly.area());
+
         //get convex hull area
         Polygon ch_poly;
         std::vector<Point> ch_points = this->get_ch(this->points);
@@ -115,13 +117,16 @@ void polyline::convex_hull(void) {
             // increment the size of the polyline to go through the edges we just added
             size++;
         }
+
         // get polygon segments in order
         this->poly_line.clear();
         this->poly_line = this->get_segment(this->pl_points);
+
         // get polygon area
         Polygon pl_poly;
         for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) pl_poly.push_back(it->target());
         this->pl_area = std::abs(pl_poly.area());
+
         // get conex hull area
         Polygon ch_poly;
         // ch is the convex_hull of all the points (see line 57)
@@ -418,6 +423,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                 }
             }
         }
+
         // if size is 0 convex hull has opposite orientation 
         if (seg.size() == 0){
             int flag = 1;
