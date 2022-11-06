@@ -11,6 +11,7 @@
 #include <CGAL/property_map.h>
 #include <CGAL/intersections.h>
 #include <CGAL/squared_distance_2.h>
+#include <CGAL/Polygon_2_algorithms.h>
 
 #include <polyline.hpp>
 
@@ -29,6 +30,13 @@ void polyline::incremental(int init) {
 
         // expand polygon
         this->expand(i);
+
+        Polygon pl;
+        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) p.push_back(it->target());
+        this->pl_area = std::abs(pl.polygon_area_2());
+
+        Polygon ch(this->get_ch(this->points));
+        this->ch_area = std::abs(ch.polygon_area_2());
 
         auto stop = std::chrono::high_resolution_clock::now();
 
@@ -513,7 +521,6 @@ void polyline::write_to_file(std::string alg, int time) const {
         for (Point p : this->pl_points) file << p.x() << " " << p.y() << std::endl;
         for (Segment s : this->poly_line) file << s.source() << " " << s.target() << std::endl;
         file << "Algorithm: " << alg << "_" << this->edge_sel << std::endl;
-        // TODO: ======= calculate polyline and convex_hull areas =======
         file << "Area: " << this->pl_area << std::endl;
         file << "Ratio: " << (this->pl_area / this->ch_area) << std::endl;
         file << "Construction time: " << time << " msec" << std::endl;
