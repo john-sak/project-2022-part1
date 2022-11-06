@@ -29,11 +29,11 @@ void polyline::incremental(int init) {
 
         // expand polygon
         this->expand(i);
-
+        //get polygon area
         Polygon pl_poly;
         for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) pl_poly.push_back(it->target());
         this->pl_area = std::abs(pl_poly.area());
-
+        //get convex hull area
         Polygon ch_poly;
         std::vector<Point> ch_points = this->get_ch(this->points);
         for (auto it = ch_points.begin(); it != ch_points.end(); ++it) ch_poly.push_back(*it);
@@ -115,13 +115,14 @@ void polyline::convex_hull(void) {
             // increment the size of the polyline to go through the edges we just added
             size++;
         }
+        // get polygon segments in order
         this->poly_line.clear();
         this->poly_line = this->get_segment(this->pl_points);
-
+        // get polygon area
         Polygon pl_poly;
         for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) pl_poly.push_back(it->target());
         this->pl_area = std::abs(pl_poly.area());
-
+        // get conex hull area
         Polygon ch_poly;
         // ch is the convex_hull of all the points (see line 57)
         for (auto it = ch.begin(); it != ch.end(); ++it) ch_poly.push_back(*it);
@@ -299,13 +300,11 @@ void polyline::expand(int i) {
 
             // remove point to add it to the right place
             this->pl_points.pop_back();
-            // std::cout <<  "REPLACEABLE " << replaceable_edge.source() << " " << replaceable_edge.target() << std::endl;
 
             //insert segment
             auto index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
             this->poly_line.insert(index, Segment(replaceable_edge.source(), this->points[i]));
             index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
-            // std::cout <<  "FOUND " << index->source() << " " << index->target() << std::endl;
             this->poly_line.insert(index, Segment(this->points[i], replaceable_edge.target()));
             index = std::find(poly_line.begin(), poly_line.end(), replaceable_edge);
             this->poly_line.erase(index);
@@ -373,7 +372,6 @@ std::vector<Segment> polyline::get_red_edges(std::vector<Segment> prev, std::vec
     }
 }
 
-// for every red edge, checks if it is visible from point i
 std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edges) {
     try {
         std::vector<Segment> seg;
@@ -420,6 +418,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                 }
             }
         }
+        // if size is 0 convex hull has opposite orientation 
         if (seg.size() == 0){
             int flag = 1;
             for (Segment red : red_edges) {
