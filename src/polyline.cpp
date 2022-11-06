@@ -510,7 +510,7 @@ void polyline::write_to_file(std::string alg, int time) const {
     try {
         std::ofstream file(this->out_file);
         file << "Polygonization" << std::endl;
-        for (Point p : this->points) file << p.x() << " " << p.y() << std::endl;
+        for (Point p : this->pl_points) file << p.x() << " " << p.y() << std::endl;
         for (Segment s : this->poly_line) file << s.source() << " " << s.target() << std::endl;
         file << "Algorithm: " << alg << "_" << this->edge_sel << std::endl;
         // TODO: ======= calculate polyline and convex_hull areas =======
