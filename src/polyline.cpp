@@ -106,7 +106,7 @@ void polyline::convex_hull(void) {
             this->poly_line.erase(index);
             i--;
 
-            //  add point to polygon points        
+            //  add point to polygon points
             auto pindex = std::find(pl_points.begin(), pl_points.end(), edge.target());
             if (pindex == this->pl_points.begin()) this->pl_points.push_back(this->points[p_index]);
             else this->pl_points.insert(pindex, this->points[p_index]);
@@ -192,7 +192,7 @@ int polyline::init_triangle(void) {
             return 3;
         }
 
-        //if initial points are collinear 
+        //if initial points are collinear
         int i = 3;
         int flag = 1;
 
@@ -250,7 +250,7 @@ void polyline::expand(int i) {
             curr_ch_segment = this->get_segment(curr_ch);
 
             // red lines of current convex hull are the ones removed from previous convex hull
-            // compare the two segments to get red lines 
+            // compare the two segments to get red lines
             red_edges = this->get_red_edges(prev_ch_segment, curr_ch_segment);
 
             // point has the same x or y coordinate (depends of sorting) as a prev one
@@ -315,7 +315,7 @@ void polyline::expand(int i) {
             if (pindex == this->pl_points.begin()) this->pl_points.push_back(this->points[i]);
             else this->pl_points.insert(pindex, this->points[i]);
 
-            i++; 
+            i++;
         }
 
         return;
@@ -349,7 +349,7 @@ std::vector<Segment> polyline::get_segment(std::vector<Point> points) {
         int i = 0;
         while(i != (points.size() - 1)) {
             seg.push_back(Segment(points[i], points[i+1]));
-            i++;    
+            i++;
         }
 
         seg.push_back(Segment(points[points.size() - 1], points[0]));
@@ -400,7 +400,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                 if (red.source() == it->source() ) {
 
                     while(red.target() != it->target() && it != this->poly_line.end()) {
-                        // create edges connecting the start and end point 
+                        // create edges connecting the start and end point
                         // of the possible visible edge with the point
                         Segment red1(p, it->source()), red2(p, it->target());
 
@@ -409,7 +409,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                         if (is_vis(red1, red2)) seg.push_back(Segment(it->source(), it->target()));
 
                         it++;
-                        // stop when the end of a polyline edge is the same as of the red edge    
+                        // stop when the end of a polyline edge is the same as of the red edge
                     }
 
                     Segment red1(p, it->source()), red2(p, it->target());
@@ -437,7 +437,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
 
                     if (red.target() == it->source()) {
                         while(red.source() != it->target()) {
-                            // create edges connecting the start and end point 
+                            // create edges connecting the start and end point
                             // of the possible visible edge with the point
                             Segment red1(p, it->source()), red2(p, it->target());
 
@@ -445,7 +445,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
                             // if at least one polyline intersects the possible visible edge is not visible
                             if (is_vis(red1, red2)) seg.push_back(*it);
                             it++;
-                            // stop when the end of a polyline edge is the same as of the red edge    
+                            // stop when the end of a polyline edge is the same as of the red edge
                         }
 
                         Segment red1(p, it->source()), red2(p, it->target());
@@ -455,7 +455,7 @@ std::vector<Segment> polyline::get_vis_edges(int i, std::vector<Segment> red_edg
 
                     }
                 }
-            }   
+            }
         }
 
         return seg;
@@ -477,7 +477,7 @@ bool polyline::is_vis(Segment red1, Segment red2) const {
             Segment iseg;
 
             // check if the only point that intersects is the common point of the egdes
-            if (CGAL::assign(ipoint, result1) && !intersection(red2, line) && ipoint != red1.target())  return false;          
+            if (CGAL::assign(ipoint, result1) && !intersection(red2, line) && ipoint != red1.target())  return false;
             if (CGAL::assign(ipoint, result2) && !intersection(red1, line) && ipoint != red2.target()) return false;
             if (CGAL::assign(iseg, result1) || CGAL::assign(iseg, result2)) return false;
         }
