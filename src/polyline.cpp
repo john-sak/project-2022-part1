@@ -97,11 +97,17 @@ void polyline::convex_hull(void) {
             this->poly_line.erase(index);
             i--;
 
-            this->pl_points.push_back(this->points[p_index]);
+            //  add point to polygon points        
+            auto pindex = std::find(pl_points.begin(), pl_points.end(), edge.target());
+            if (pindex == this->pl_points.begin()) this->pl_points.push_back(this->points[p_index]);
+            else this->pl_points.insert(pindex, this->points[p_index]);
+
 
             // increment the size of the polyline to go through the edges we just added
             size++;
         }
+        this->poly_line.clear();
+        this->poly_line = this->get_segment(this->pl_points);
 
         auto stop = std::chrono::high_resolution_clock::now();
 
