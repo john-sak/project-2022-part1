@@ -11,7 +11,6 @@
 #include <CGAL/property_map.h>
 #include <CGAL/intersections.h>
 #include <CGAL/squared_distance_2.h>
-#include <CGAL/Polygon_2_algorithms.h>
 
 #include <polyline.hpp>
 
@@ -31,14 +30,14 @@ void polyline::incremental(int init) {
         // expand polygon
         this->expand(i);
 
-        Polygon pl;
-        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) pl.push_back(it->target());
-        this->pl_area = std::abs(pl.area());
+        Polygon pl_poly;
+        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) pl_poly.push_back(it->target());
+        this->pl_area = std::abs(pl_poly.area());
 
-        Polygon ch;
+        Polygon ch_poly;
         std::vector<Point> ch_points = this->get_ch(this->points);
-        for (auto it = ch_points.begin(); it != ch_points.end(); ++it) ch.push_back(*it);
-        this->ch_area = std::abs(ch.area());
+        for (auto it = ch_points.begin(); it != ch_points.end(); ++it) ch_poly.push_back(*it);
+        this->ch_area = std::abs(ch_poly.area());
 
         auto stop = std::chrono::high_resolution_clock::now();
 
@@ -118,6 +117,15 @@ void polyline::convex_hull(void) {
         }
         this->poly_line.clear();
         this->poly_line = this->get_segment(this->pl_points);
+
+        Polygon pl_poly;
+        for(auto it = this->poly_line.begin(); it != this->poly_line.end(); ++it) pl_poly.push_back(it->target());
+        this->pl_area = std::abs(pl_poly.area());
+
+        Polygon ch_poly;
+        // ch is the convex_hull of all the points (see line 57)
+        for (auto it = ch.begin(); it != ch.end(); ++it) ch_poly.push_back(*it);
+        this->ch_area = std::abs(ch_poly.area());
 
         auto stop = std::chrono::high_resolution_clock::now();
 
