@@ -353,6 +353,7 @@ std::vector<Segment> polyline::get_segment(std::vector<Point> points) {
         }
 
         seg.push_back(Segment(points[points.size() - 1], points[0]));
+
         return seg;
     } catch (...) {
         throw;
